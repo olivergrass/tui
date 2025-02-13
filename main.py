@@ -9,6 +9,7 @@ from src.drawing.drawing_interface import DrawingInterface
 from src.drawing.primitives import DrawingPrimitives
 from src.ui.window import Window
 from ui.container import Container
+from ui.input import Input
 from ui.text import Text
 
 
@@ -94,7 +95,6 @@ class TerminalUI:
         """Create a new window with given dimensions"""
         window = Window(name, x, y, width, height, title)
         self.windows[name] = window
-        self.focus_manager.register(window)
         return window
 
     def create_horizontal_split(
@@ -148,9 +148,11 @@ if __name__ == "__main__":
         board_window, eval_window = tui.create_horizontal_split(
             ["board", "eval"], [0.6, 0.4]
         )
+        tui.focus_manager.register(board_window)
+        tui.focus_manager.register(eval_window)
 
         # Register keyboard handlers
-        @tui.keyboard.on_key("w")
+        @tui.keyboard.on_key("up")
         def handle_focus(event):
             tui.focus_manager.focus_next()
 
@@ -160,13 +162,18 @@ if __name__ == "__main__":
 
         style = {"fg": "#2a2a2a", "bg": "#FFFFFF"}
 
-        container = Container(1, 1, 38, 18).style(style)
-        container.add(Text("Chess board here", 2, 2).width(36))
-        board_window.add(container)
+        # container = Container(1, 1, 38, 18).style(style)
+        # container.add(Text("Chess board here", 2, 2).width(36))
+        # board_window.add(container)
         board_window.title = "Board"
 
         # eval_window.style(style)
-        eval_window.draw.rectangle(1, 1, 28, 18)
+        # eval_window.draw.rectangle(1, 1, 28, 18)
         eval_window.add(Text("Evaluation: +0.5", 2, 2).width(26))
+
+        input_field: Input = Input(2, 4, width=24)
+        input_field.set_keyboard_handler(tui.keyboard)
+        eval_window.add(input_field)
+        tui.focus_manager.register(input_field)
 
         tui.run()

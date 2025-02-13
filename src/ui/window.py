@@ -46,32 +46,23 @@ class Window(Component, Renderable, Selectable):
         """Render window contents to the main screen buffer"""
         style = self.effective_style
 
-        if self.focused:
-            self.shapes._draw_border(
-                x=0,
-                y=0,
-                width=self._width,
-                height=self._height,
-                fg=self._selection_style.border_fg,
-                bg=self._selection_style.border_bg,
-            )
-        else:
-            # Clear border
-            self.shapes._draw_border(
-                x=0,
-                y=0,
-                width=self._width,
-                height=self._height,
-                fg=style.bg,
-                bg=style.bg
-            )
+        # Draw border with appropriate color based on focus state
+        border_fg = self._selection_style.border_fg if self.focused else style.fg
+        border_bg = self._selection_style.border_bg if self.focused else style.bg
+
+        # Draw border
+        self.shapes._draw_border(
+            x=0, y=0, width=self._width, height=self._height, fg=border_fg, bg=border_bg
+        )
 
         # Draw title if present
         if self.title:
             self.primitives.draw_string(
-                2, 0, f" {self.title} ",
-                fg=self._selection_style.border_fg,
-                bg=style.bg
+                2,
+                0,
+                f" {self.title} ",
+                fg=border_fg,
+                bg=border_bg,
             )
 
         # Copy local buffer contents to main buffer
