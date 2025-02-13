@@ -1,5 +1,4 @@
-import time
-
+from core.focus import FocusManager
 from core.keyboard import KeyboardHandler
 from drawing.render import RenderContext
 from src.core.color import ColorManager
@@ -9,6 +8,7 @@ from src.drawing.complex_shapes import ComplexShapes
 from src.drawing.drawing_interface import DrawingInterface
 from src.drawing.primitives import DrawingPrimitives
 from src.ui.window import Window
+from ui.container import Container
 from ui.text import Text
 
 
@@ -17,6 +17,8 @@ class TerminalUI:
         self.terminal: TerminalController = TerminalController()
         self.keyboard = KeyboardHandler()
         self.quit = False
+
+        self.focus_manager = FocusManager()
 
         # Initialize global render context
         self.context: RenderContext = RenderContext()
@@ -36,8 +38,7 @@ class TerminalUI:
 
         # Create root window
         self.root_window = Window(
-            "root",
-            0, 0, self.screen_buffer.width, self.screen_buffer.height
+            "root", 0, 0, self.screen_buffer.width, self.screen_buffer.height
         )
 
         # Use main screen buffer for root window
@@ -70,6 +71,7 @@ class TerminalUI:
         self.terminal._show_cursor()
         self.terminal._use_main_screen()
         if exc_type is KeyboardInterrupt:
+            self.quit = True
             print("\nGoodbye!")
             return True  # Suppress the KeyboardInterrupt
 
@@ -92,6 +94,7 @@ class TerminalUI:
         """Create a new window with given dimensions"""
         window = Window(name, x, y, width, height, title)
         self.windows[name] = window
+        self.focus_manager.register(window)
         return window
 
     def create_horizontal_split(
@@ -147,16 +150,22 @@ if __name__ == "__main__":
         )
 
         # Register keyboard handlers
-        @tui.keyboard.on_key('q')
+        @tui.keyboard.on_key("w")
+        def handle_focus(event):
+            tui.focus_manager.focus_next()
+
+        @tui.keyboard.on_key("q")
         def handle_quit(event):
             tui.stop()
 
         style = {"fg": "#2a2a2a", "bg": "#FFFFFF"}
-        board_window.style(style)
-        board_window.draw.rectangle(1, 1, 38, 18)
-        board_window.add(Text("Chess board here", 2, 2).width(36))
 
-        eval_window.style(style)
+        container = Container(1, 1, 38, 18).style(style)
+        container.add(Text("Chess board here", 2, 2).width(36))
+        board_window.add(container)
+        board_window.title = "Board"
+
+        # eval_window.style(style)
         eval_window.draw.rectangle(1, 1, 28, 18)
         eval_window.add(Text("Evaluation: +0.5", 2, 2).width(26))
 

@@ -141,11 +141,8 @@ def main():
             width=width,
             align="center",
         )
-        tui.render()
 
-        while True:
-            time.sleep(0.1)
-
+        tui.run()
 
 if __name__ == "__main__":
     main()

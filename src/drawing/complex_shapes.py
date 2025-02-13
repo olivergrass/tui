@@ -27,7 +27,9 @@ class ComplexShapes:
         if border:
             self._draw_border(x, y, width, height)
 
-    def _draw_border(self, x: int, y: int, width: int, height: int):
+    def _draw_border(
+        self, x: int, y: int, width: int, height: int, fg: str = None, bg: str = None
+    ):
         """Helper method to draw box borders using Unicode characters."""
         BOX = {
             "top_left": "┌",
@@ -39,18 +41,24 @@ class ComplexShapes:
         }
 
         # Draw corners
-        self.primitives.draw_char(x, y, BOX["top_left"])
-        self.primitives.draw_char(x + width - 1, y, BOX["top_right"])
-        self.primitives.draw_char(x, y + height - 1, BOX["bottom_left"])
-        self.primitives.draw_char(x + width - 1, y + height - 1, BOX["bottom_right"])
+        self.primitives.draw_char(x, y, BOX["top_left"], fg=fg, bg=bg)
+        self.primitives.draw_char(x + width - 1, y, BOX["top_right"], fg=fg, bg=bg)
+        self.primitives.draw_char(x, y + height - 1, BOX["bottom_left"], fg=fg, bg=bg)
+        self.primitives.draw_char(
+            x + width - 1, y + height - 1, BOX["bottom_right"], fg=fg, bg=bg
+        )
 
         # Draw edges
         for dx in range(1, width - 1):
-            self.primitives.draw_char(x + dx, y, BOX["horizontal"])
-            self.primitives.draw_char(x + dx, y + height - 1, BOX["horizontal"])
+            self.primitives.draw_char(x + dx, y, BOX["horizontal"], fg=fg, bg=bg)
+            self.primitives.draw_char(
+                x + dx, y + height - 1, BOX["horizontal"], fg=fg, bg=bg
+            )
         for dy in range(1, height - 1):
-            self.primitives.draw_char(x, y + dy, BOX["vertical"])
-            self.primitives.draw_char(x + width - 1, y + dy, BOX["vertical"])
+            self.primitives.draw_char(x, y + dy, BOX["vertical"], fg=fg, bg=bg)
+            self.primitives.draw_char(
+                x + width - 1, y + dy, BOX["vertical"], fg=fg, bg=bg
+            )
 
     def draw_matrix(
         self,
@@ -96,7 +104,9 @@ class ComplexShapes:
                     center_y = cell_y + cell_height // 2
                     self.primitives.draw_string(center_x, center_y, value)
 
-    def draw_table(self, x: int, y: int, headers: list, data: list, col_widths: list = None):
+    def draw_table(
+        self, x: int, y: int, headers: list, data: list, col_widths: list = None
+    ):
         """Draw a formatted table with headers and data."""
         if not col_widths:
             col_widths = [
