@@ -1,5 +1,6 @@
 import time
 
+from core.keyboard import KeyboardHandler
 from drawing.render import RenderContext
 from src.core.color import ColorManager
 from src.core.screen_buffer import ScreenBuffer
@@ -14,6 +15,8 @@ from ui.text import Text
 class TerminalUI:
     def __init__(self):
         self.terminal: TerminalController = TerminalController()
+        self.keyboard = KeyboardHandler()
+        self.quit = False
 
         # Initialize global render context
         self.context: RenderContext = RenderContext()
@@ -69,6 +72,19 @@ class TerminalUI:
         if exc_type is KeyboardInterrupt:
             print("\nGoodbye!")
             return True  # Suppress the KeyboardInterrupt
+
+    def run(self):
+        """Main event loop"""
+        while not self.quit:
+            self.render()
+
+            key_event = self.keyboard.get_key()
+            if key_event:
+                self.keyboard.handle_key(key_event)
+
+    def stop(self):
+        """Stop the main loop"""
+        self.quit = True
 
     def create_window(
         self, name: str, x: int, y: int, width: int, height: int, title: str = ""
@@ -129,19 +145,19 @@ if __name__ == "__main__":
         board_window, eval_window = tui.create_horizontal_split(
             ["board", "eval"], [0.6, 0.4]
         )
+
+        # Register keyboard handlers
+        @tui.keyboard.on_key('q')
+        def handle_quit(event):
+            tui.stop()
+
         style = {"fg": "#2a2a2a", "bg": "#FFFFFF"}
-
-        # Draw using the drawing interface
-
         board_window.style(style)
         board_window.draw.rectangle(1, 1, 38, 18)
         board_window.add(Text("Chess board here", 2, 2).width(36))
 
-        # Draw directly using window's drawing capabilities
         eval_window.style(style)
         eval_window.draw.rectangle(1, 1, 28, 18)
         eval_window.add(Text("Evaluation: +0.5", 2, 2).width(26))
 
-        tui.render()
-        while True:
-            time.sleep(0.1)
+        tui.run()
