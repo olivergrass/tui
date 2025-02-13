@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Performance tracking
+*.perf
